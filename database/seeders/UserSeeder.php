@@ -34,6 +34,6 @@ class UserSeeder extends Seeder
 //            'name' => 'user',
 //            'email' => 'user@user.com'
 //        ]);
-        User::factory()->count(10)->create();
+        User::factory()->count(100)->create();
     }
 }

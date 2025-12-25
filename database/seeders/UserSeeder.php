@@ -19,11 +19,15 @@ class UserSeeder extends Seeder
             'name' => 'admin',
             'email' => 'admin@admin.com'
         ]);
-        // User::factory()->create([
-        //     'role_id' => Role::where('name', 'admin')->first()->id,
-        //     'name' => 'sutjapong',
-        //     'email' => 'sutjapong.p@gmail.com'
-        // ]);
+        User::factory()->create([
+            'role_id' => Role::where('name', 'user')->first()->id,
+            'institution' => 'มหาวิทยาลนเรศวร',
+            'tel' => '0885525396',
+            'name' => 'คุณนเรศวร',
+            'email' => 'test@test.com'
+        ]);
+
+
 //        User::factory()->create([
 //            'role_id' => Role::where('name', 'manager')->first()->id,
 //            'name' => 'manager',

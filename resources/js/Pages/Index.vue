@@ -1,7 +1,20 @@
 <template>
     <Layout>
         <div>
-            dfdfdfd
+            <div class="card bg-base-100 w-96 shadow-sm">
+                <figure>
+                    <img
+                    src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
+                    alt="Shoes" />
+                </figure>
+                <div class="card-body">
+                    <h2 class="card-title">{{ $page.props.user.institution }}</h2>
+                    <p>A card component has a figure, a body part, and inside body there are title and actions parts</p>
+                    <div class="card-actions justify-end">
+                        <Link class="btn btn-primary" :href="route('form')">แก้ไข</Link>
+                    </div>
+                </div>
+            </div>
         </div>
     </Layout>
 </template>
@@ -11,6 +24,7 @@ import Layout from "@/Pages/Layout/Layout.vue";
 import axios from 'axios';
 import {Link} from "@inertiajs/vue3";
 import {router} from "@inertiajs/vue3";
+
 
 export default {
     name: "Index",

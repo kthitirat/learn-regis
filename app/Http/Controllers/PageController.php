@@ -84,6 +84,28 @@ class PageController extends Controller
         return Excel::download(new ArrayExporter($data), 'test-export.xlsx');
     }
 
+    public function form()
+    {
+         return Inertia::render('Form');
+    }
+
+    public function saveDraft(Request $request)
+    {
+        dd($request->all());
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 //    public function login()
 //    {
 //        return Inertia::render('Auth/Login');

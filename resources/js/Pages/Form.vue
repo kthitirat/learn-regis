@@ -11,6 +11,16 @@
       <div class="mt-6 rounded-2xl border border-gray-200 bg-white shadow-sm ring-1 ring-black/5">
         <form class="p-4 sm:p-6 lg:p-8">
           <!-- ปรับเป็น grid responsive -->
+            <div class="flex w-full justify-end pr-4"> 
+
+                <div class="" v-if="!isSaved" >
+                    <span class="loading loading-spinner"></span>
+                </div>
+
+                <div v-if="isSaved" class="badge badge-accent badge-outline uppercase">saved</div>
+
+            </div>
+
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
 
             <div class="md:col-span-2">
@@ -572,7 +582,11 @@
                 type="date"
                 />
             </label>
-            <div v-if="$page.props.errors.arrival_date" class="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 border border-red-100">
+            <p v-if="arrivalDateTh" class="mt-1 text-xs text-gray-500">
+                แสดงผล: {{ arrivalDateTh }}
+            </p>
+
+            <div v-if="$page.props.errors.arrival_date" class="text-red-500 text-sm">
                 {{ $page.props.errors.arrival_date }}
             </div>
             </div>
@@ -608,6 +622,9 @@
                 type="date"
                 />
             </label>
+              <p v-if="departureDateTh" class="mt-1 text-xs text-gray-500">
+                แสดงผล: {{ departureDateTh }}
+            </p>
             <div v-if="$page.props.errors.departure_date" class="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 border border-red-100">
                 {{ $page.props.errors.departure_date }}
             </div>
@@ -711,7 +728,7 @@
         </div> 
         <div class="mt-8 w-full border-t border-gray-100 pt-6">
         <div class="flex w-full justify-end items-center gap-3">
-            <button
+            <!-- <button
             :disabled="isSubmitting"
             type="button"
             @click="saveDraft"
@@ -721,7 +738,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
             </svg>
             บันทึกฉบับร่าง
-            </button>
+            </button> -->
 
             <button
             :disabled="isSubmitting"
@@ -754,12 +771,17 @@ export default {
     name: "Index",
     components: {Layout,  Link},
     props: {
-       
+        performance:{
+            type: Object,
+            required: true
+        }
     },
-    data() {
-        
+    data() {        
         return {
             isSubmitting: false,
+            dirtyForm: false,
+            debounce: null,
+           
             form: useForm({
                 institution: this.$page.props.user?.institution ?? "",
                 email: this.$page.props.user?.email,
@@ -810,14 +832,63 @@ export default {
             this.isSubmitting = true;
             const url = this.route('save_draft');
             const res = await axios.post(url, this.form);
+            if (res.status === 200) {
+                this.isSubmitting = false;
+                this.dirtyForm = false;
+                return
+            }
 
-        }
+        },
+        formatThaiDate(dateStr) {
+            if (!dateStr) return null;
+
+            // dateStr ควรเป็น "YYYY-MM-DD"
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return null;
+
+            const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
+                            'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+
+            const day = d.getDate();
+            const month = months[d.getMonth()];
+            const yearBE = d.getFullYear() + 543;
+
+            // ตัวอย่าง: "19 ต.ค.2568" (มีช่องว่างหลังวัน แต่ไม่มีช่องว่างก่อนปี)
+            return `${day} ${month}${yearBE}`;
+        },
+
         
     },
     watch: {
-        
+        form: {
+           handler() {
+            this.dirtyForm = true;
+            clearTimeout(this.debounce) 
+                this.debounce = setTimeout( () => {
+                    this.saveDraft();               
+                }, 3000);
+           },
+           deep: true
+           
+      }
     },
-    computed: {}
+    computed: {
+        
+          isSaved() {
+            if (this.dirtyForm) {
+                return false;
+            }
+            return true;
+        },
+
+        arrivalDateTh() {
+            return this.formatThaiDate(this.form.arrival_date);
+        },
+
+        departureDateTh() {
+            return this.formatThaiDate(this.form.departure_date);
+        },
+    }
 };
 </script>
 

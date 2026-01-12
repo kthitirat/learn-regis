@@ -23,15 +23,13 @@ class PageController extends Controller
 {
     public function index(Request $request)
     {
-        $filters = $request->only('search');
-        $subjects = Subject::with('professors')
-            ->filter($filters)
-            ->whereNotNull('published_at')
-            ->orderBy('published_at', 'desc')
-            ->paginate(20);
-        $subjectData = fractal($subjects, new SubjectTransformer())->includeImage()->toArray();
+        $performance = Performance::where('user_id', Auth::id())->first();
+        $performanceData = null;
+        if ($performance) {
+            $performanceData = fractal($performance, new PerformanceTransformer())->toArray();
+        }       
         return Inertia::render('Index')->with([
-            'subjects' => $subjectData
+            'performance' => $performanceData
         ]);
     }
 
@@ -121,6 +119,14 @@ class PageController extends Controller
         ], 200);
     }
 
+    public function submitForm(Performance $performance)
+    {
+       $performance->is_published = true;
+       $performance->save();
+        return response()->json(
+            null, 200);
+
+    }
 
 
 

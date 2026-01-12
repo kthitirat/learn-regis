@@ -741,6 +741,7 @@
             </button> -->
 
             <button
+            @click.prevent="submit"
             :disabled="isSubmitting"
             type="button"
             class="btn btn-primary min-w-[140px] shadow-sm text-white bg-[#6366F1] border-none"
@@ -837,7 +838,37 @@ export default {
                 this.dirtyForm = false;
                 return
             }
-
+        },
+        async submit(){
+            const result = await this.$swal({
+                title: "คุณต้องการจะส่งข้อมูล?",
+                text: "โปรดระวัง! เมื่อส่งข้อมูลแล้วท่านจะไม่สามารถแก้ไขได้",
+                showCancelButton: true,
+                confirmButtonText: "ยืนยัน",
+                confirmButtonColor: "#f43f5e",
+            });
+            if (!result.isConfirmed) {
+                return;
+            }
+            this.isSending = true;
+            const url = this.route('submit_form', this.performance.id);
+            const res = await axios.patch(url, {});
+            if (res.status === 200) {
+                this.isSending = false;
+                setTimeout(() => {
+                    this.$swal({
+                        position: 'center',
+                        icon: 'success',
+                        title: 'ท่านได้ยื่นรายละเอียดการแสดงเรียบร้อยแล้ว',
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        window.location.href = this.route('index');
+                    })
+                }, 500);
+            } else {
+                this.isSending = false;
+            }
         },
         formatThaiDate(dateStr) {
             if (!dateStr) return null;

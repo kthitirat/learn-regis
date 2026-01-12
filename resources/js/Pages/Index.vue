@@ -4,15 +4,20 @@
             <div v-if="$page.props.user" class="card bg-base-100 w-96 shadow-sm">
                 <figure>
                     <img
-                    src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
+                    src="https://picsum.photos/500/400"
                     alt="Shoes" />
                 </figure>
                 <div class="card-body">
                     <h2 class="card-title">งานศิลปวัฒนธรรมอุดมศึกษา</h2>
                     <p>{{ $page.props.user.institution }}</p>
                     <div class="card-actions justify-end">
-                        <Link class="btn btn-primary" :href="route('form')">แก้ไข</Link>
+                        <Link v-if="performance && !performance.is_published" class="btn btn-primary" :href="route('form')">แก้ไข</Link>
+
+                        <div v-if="performance && performance.is_published" class="px-4 py-2 bg-green-700 rounded-md text-white opacity-50">ส่งเรียบร้อย</div> 
                     </div>
+                   
+                                      
+
                 </div>
             </div>
         </div>
@@ -31,8 +36,8 @@ export default {
     components: {Layout,  Link},
     props: {
        performance:{
-            type: Object,
-            required: true
+            type: Object || null,
+            default: null
        }
     },
     data() {

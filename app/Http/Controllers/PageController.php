@@ -115,6 +115,7 @@ class PageController extends Controller
         // ], 200);
 
         $performance = null;
+        
         if (Auth::user()->role->name === 'admin') {
             $performance = Performance::findOrFail($request->get('performance_id'));
         }

@@ -36,7 +36,7 @@
     </div>
 </template>
 <script>
-import {HomeIcon, UserIcon, BookOpenIcon} from "@heroicons/vue/16/solid/index.js";
+import {HomeIcon, UserIcon, BookOpenIcon, TicketIcon} from "@heroicons/vue/16/solid/index.js";
 
 export default {
     name: "SideBar",
@@ -56,12 +56,12 @@ export default {
                     icon: UserIcon,
                     routeGroup: 'dashboard.users.*',
                 },
-                // professors: {
-                //     name: 'Professor',
-                //     href: this.route('dashboard.professors.index'),
-                //     icon: UserIcon,
-                //     routeGroup: 'dashboard.professors.*',
-                // },
+                performances: {
+                    name: 'Performance',
+                    href: this.route('dashboard.performances.index'),
+                    icon: TicketIcon,
+                    routeGroup: 'dashboard.performances.*',
+                },
                 // subjects: {
                 //     name: 'Subject',
                 //     href: this.route('dashboard.subjects.index'),
@@ -77,7 +77,7 @@ export default {
             const navs = [];
             navs.push(this.navs.dashboard);
             navs.push(this.navs.users);
-            // navs.push(this.navs.professors);
+            navs.push(this.navs.performances);
             // navs.push(this.navs.subjects);
             return navs;
         }

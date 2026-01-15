@@ -18,8 +18,8 @@
                 <tr v-for="(performance,index) in performanceData" :key="index"
                     class="bg-white border-b">
                     <th class="text-center">{{ performance.id }}</th>
-                    <td class="px-6 py-4">
-                        {{ performance.owner.institution }}
+                    <td class="px-6 py-4">                       
+                        <a target="_blank" :href="route('dashboard.performances.edit', performance.id)" class="underline"> {{ performance.owner.institution }} </a>
                     </td>
                     <td>
                         {{ performance.owner.name }}
@@ -32,9 +32,8 @@
                     </td>
                     <td>
                         <div class="flex w-full items-center justify-center">
-                            <input type="checkbox" class="toggle toggle-success" :checked="performance.is_published " />
-                        </div>
-                        
+                            <input @change="handlePublish(performance)" type="checkbox" class="toggle toggle-success" :checked="performance.is_published " />
+                        </div>                        
                     </td>                   
                 </tr>
                 </tbody>
@@ -58,6 +57,7 @@ import Layout from "@/Pages/Dashboard/Layout/Layout.vue";
 import {Link} from "@inertiajs/vue3";
 import {Inertia} from "@inertiajs/inertia";
 import {nextTick} from "vue";
+import axios from "axios";
 
 export default {
     name: "performanceIndex",
@@ -82,21 +82,15 @@ export default {
         this.pagination = this.performances.meta.pagination;
     },
     methods: {
-        handleDeleteSubject(professor) {
-            this.$swal.fire({
-                title: "คุณต้องการที่จะลบอาจารย์ " + professor.full_name + '?',
-                showDenyButton: true,
-                showCancelButton: true,
-                showConfirmButton: false,
-                denyButtonText: 'ลบ'
-            }).then((result) => {
-                if (result.isDenied) {
-                    Inertia.delete(this.route('dashboard.professors.destroy', professor.id));
-                    nextTick(() => {
-                        window.location.reload();
-                    })
-                }
-            });
+        async handlePublish(performance)
+        {
+            try{
+                const response = await axios.post(this.route('dashboard.performances.toggle_publish', performance.id));
+            }catch (e) {
+                console.log(e);
+            }
+            
+          
         },
         selectPage(pag) {
             Inertia.get(pag.url);

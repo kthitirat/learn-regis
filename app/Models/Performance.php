@@ -4,10 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Image\Manipulations;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Illuminate\Support\Str;
 
-class Performance extends Model
+class Performance extends Model implements HasMedia
 {
     use HasFactory;
+    use InteractsWithMedia;
+
+    public const MEDIA_COLLECTION_IMAGES = 'images';
+    //public const MEDIA_COLLECTION_DOCUMENTS = 'documents';
 
     protected $fillable = [
         'user_id',
@@ -54,10 +63,22 @@ class Performance extends Model
     ];
 
 
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection(self::MEDIA_COLLECTION_IMAGES)
+            ->registerMediaConversions(function (Media $media) {
+                $this
+                    ->addMediaConversion('optimized')
+                    ->fit(Manipulations::FIT_MAX, 800, 800)
+                    ->optimize()
+                    ->keepOriginalImageFormat();
+            });
+    }
+
+    
     public function owner()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-
 
 }

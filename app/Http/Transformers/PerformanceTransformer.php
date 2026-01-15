@@ -10,7 +10,7 @@ use League\Fractal\TransformerAbstract;
 
 class PerformanceTransformer extends TransformerAbstract
 {
-   // protected array $availableIncludes = ['images'];
+    protected array $availableIncludes = ['images'];
 
     public function transform(Performance $performance): array
     {
@@ -60,16 +60,16 @@ class PerformanceTransformer extends TransformerAbstract
             'created_at' => $performance->created_at->format('Y-m-d H:i:s'),
             'updated_at' => $performance->updated_at->format('Y-m-d H:i:s'),
             'submitted_at' => $performance->updated_at->format('d/m/Y'),
-            'owner' => fractal($performance->owner, new UserTransformer())->toArray()
+            'owner' => fractal($performance->owner, new UserTransformer())->toArray()   //ผูกกับ Performance
         ];
         return $data;
     }
 
-    // public function includeImages(Performance $performance)
-    // {
-    //     $images = $performance->getMedia(Performance::MEDIA_COLLECTION_IMAGES);
-    //     return $this->collection($images, new ImageTransformer());
-    // }
+    public function includeImages(Performance $performance)
+    {
+        $images = $performance->getMedia(Performance::MEDIA_COLLECTION_IMAGES);
+        return $this->collection($images, new ImageTransformer());
+    }
 
 
 }

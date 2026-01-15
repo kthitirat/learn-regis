@@ -8,6 +8,7 @@ use App\Http\Services\LineNotifyService;
 use App\Http\Transformers\PerformanceTransformer;
 use App\Http\Requests\Dashboard\SavePerformanceDraftRequest;
 use App\Http\Transformers\SubjectTransformer;
+use App\Http\Transformers\ImageTransformer;
 use App\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -89,7 +90,7 @@ class PageController extends Controller
     public function form()
     {
         $performance = Performance::where('user_id', Auth::id())->first();      //ดึงข้อมูลรายการ Performance ของผู้ใช้ที่ล็อกอินอยู่” ออกมาหนึ่งรายการ (รายการแรกที่พบ)
-        $performanceData = fractal($performance, new PerformanceTransformer())->toArray();
+        $performanceData = fractal($performance, new PerformanceTransformer())->includeImages()->toArray();
         return Inertia::render('Form')->with([
             'performance' => $performanceData
         ]);
@@ -97,26 +98,38 @@ class PageController extends Controller
 
     public function saveDraft(SavePerformanceDraftRequest $request, SavePerformanceAction $action)
     {
-        $userId = Auth::id();
-
+        //$userId = Auth::id();
         // ถ้ามี performance_id และเป็นของ user นี้ ใช้อันนั้น
+        // $performance = null;
+        // if ($request->filled('performance_id')) {
+        //     $performance = Performance::where('id', $request->performance_id)
+        //         ->where('user_id', $userId)
+        //         ->first();
+        // }
+        // if (!$performance) {
+        //     $performance = Performance::firstOrCreate(['user_id' => $userId]);
+        // }
+        // $performance = $action->execute($performance, $request->validated());
+        // return response()->json([
+        //     'performance_id' => $performance->id,
+        // ], 200);
+
         $performance = null;
-        if ($request->filled('performance_id')) {
-            $performance = Performance::where('id', $request->performance_id)
-                ->where('user_id', $userId)
-                ->first();
+        if (Auth::user()->role->name === 'admin') {
+            $performance = Performance::findOrFail($request->get('performance_id'));
         }
-
-        // ถ้าไม่มี ให้เอาของ user นี้ (เพราะ user_id unique => มีได้แค่ 1 แถว)
+        if (Auth::user()->role->name === 'user') {
+            $performance = Performance::where('user_id', Auth::id())->first();
+        }
         if (!$performance) {
-            $performance = Performance::firstOrCreate(['user_id' => $userId]);
+            $performance = Performance::create([
+                'user_id' => Auth::id(),
+            ]);
         }
+        $updatedPerformance = $action->execute($performance, $request->validated());
+        $data['performance_id'] = $updatedPerformance->id;
+        return response()->json($data, 200);
 
-        $performance = $action->execute($performance, $request->validated());
-
-        return response()->json([
-            'performance_id' => $performance->id,
-        ], 200);
     }
 
     public function submitForm(Performance $performance)
@@ -128,7 +141,47 @@ class PageController extends Controller
 
     }
 
+    public function uploadImage(Request $request)
+    {
+        $req = $request->validate([
+            'image' => ['required', 'image', 'mimes:jpeg,png,jpg', 'max:10240'],
+            'performance_id' => ['nullable'],
+        ]);
+        $performance = null;
+        if (Auth::user()->role->name === 'admin') {
+            $performance = Performance::findOrFail($request->get('performance_id'));
+        }
+        if (Auth::user()->role->name === 'user') {
+            $performance = Performance::where('user_id', Auth::id())->first();
+        }
+        if (!$performance) {
+            $performance = Performance::create([
+                'user_id' => Auth::id(),
+            ]);
+        }
+        $media = $performance->addMedia($req['image'])->toMediaCollection(Performance::MEDIA_COLLECTION_IMAGES);
+        $images = $performance->getMedia(Performance::MEDIA_COLLECTION_IMAGES);
+        $imagesData = fractal($images, new ImageTransformer())->toArray();
+        $data['images'] = $imagesData;
+        $data['performance_id'] = $performance->id;
+        return response()->json($data);
+    }
 
+    public function deleteImage(Performance $performance, Request $request)
+    {
+        $req = $request->validate([
+            'image_id' => ['required', 'exists:media,id'],
+        ]);
+        $media = $performance->getMedia(Performance::MEDIA_COLLECTION_IMAGES)->where('id', $req['image_id'])->first();
+        if (!$media) {
+            return;
+        }
+        $media->delete();
+        $updatedPerformance = $performance->fresh();
+        $images = $updatedPerformance->getMedia(Performance::MEDIA_COLLECTION_IMAGES);
+        $imagesData = fractal($images, new ImageTransformer())->toArray();
+        return response()->json($imagesData);
+    }
 
 
 

@@ -726,32 +726,93 @@
             </div>
             </div>
         </div> 
-        <div class="mt-8 w-full border-t border-gray-100 pt-6">
-        <div class="flex w-full justify-end items-center gap-3">
-            <!-- <button
-            :disabled="isSubmitting"
-            type="button"
-            @click="saveDraft"
-            class="btn btn-outline border-gray-300 hover:bg-gray-400 text-gray-700 min-w-[140px] shadow-sm"
-            >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-            </svg>
-            บันทึกฉบับร่าง
-            </button> -->
 
-            <button
-            @click.prevent="submit"
-            :disabled="isSubmitting"
-            type="button"
-            class="btn btn-primary min-w-[140px] shadow-sm text-white bg-[#6366F1] border-none"
-            >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-            </svg>
-            ยืนยันส่งข้อมูล
-            </button>
+        <div class="col-span-2 w-full mt-4">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
+
+               <!-- 1) รูปที่มีอยู่: 1 รูปต่อ 1 การ์ด -->
+                <div
+                    v-for="(image, index) in displayImages"
+                    :key="image.id ?? index"
+                    class="group rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm"
+                >
+                    <div class="relative w-full aspect-[4/3] bg-gray-50">
+                        <img
+                        :src="image.url"
+                        class="w-full h-full object-contain p-2"
+                        loading="lazy"
+                        alt=""
+                        />
+
+                        <button
+                            type="button"
+                            class="absolute top-2 right-2 inline-flex items-center justify-center w-9 h-9 rounded-full bg-white/90 border border-gray-200 shadow-sm opacity-0 group-hover:opacity-100 transition"
+                            @click.prevent="handleDeleteImage(image)"
+                            title="ลบรูป"
+                            >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 6L6 18M6 6l12 12"/>
+                            </svg>
+                        </button>
+                        
+                    </div>
+
+                    <div class="px-3 py-2 border-t border-gray-100">
+                        <p class="text-xs text-gray-500 truncate"></p>
+                    </div>
+                </div>
+
+                <!-- 2) ช่องเพิ่มรูป (+) -->
+                <label
+                    v-if="displayImages.length < maxImage"
+                    class="cursor-pointer rounded-2xl border-2 border-dashed border-gray-300 bg-white hover:border-gray-400 hover:bg-gray-50 transition
+                        flex flex-col items-center justify-center text-center p-4 aspect-[4/3]"
+                >
+                <input ref="imageInputRef" type="file" class="hidden"  accept=".jpeg,.png,.jpg" @change="handleSelectImage" />
+                <button
+                    @click="$refs.imageInputRef.click()"
+                    class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 border border-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14" />
+                    </svg>
+                </button>
+
+                <p class="mt-3 text-sm font-medium text-gray-800">เพิ่มรูปภาพ</p>
+                <p class="mt-1 text-xs text-gray-500">รองรับ JPG/PNG • เลือกได้ 1 ไฟล์</p>
+                </label>
+
+            </div>
         </div>
+
+
+
+
+        <div class="mt-8 w-full border-t border-gray-100 pt-6">
+            <div class="flex w-full justify-end items-center gap-3">
+                <!-- <button
+                :disabled="isSubmitting"
+                type="button"
+                @click="saveDraft"
+                class="btn btn-outline border-gray-300 hover:bg-gray-400 text-gray-700 min-w-[140px] shadow-sm"
+                >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                </svg>
+                บันทึกฉบับร่าง
+                </button> -->
+
+                <button
+                @click.prevent="submit"
+                :disabled="isSubmitting"
+                type="button"
+                class="btn btn-primary min-w-[140px] shadow-sm text-white bg-[#6366F1] border-none"
+                >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+                ยืนยันส่งข้อมูล
+                </button>
+            </div>
         </div>
 
         </form>
@@ -782,8 +843,12 @@ export default {
             isSubmitting: false,
             dirtyForm: false,
             debounce: null,
+            displayImages: [],
+            maxImage: 5,
+            performanceId: null,
            
             form: useForm({
+                performance_id: this.performance.id,
                 institution: this.$page.props.user?.institution ?? "",
                 email: this.$page.props.user?.email,
 
@@ -826,16 +891,70 @@ export default {
         }        
     },
     mounted() {
+          if (this.performance.length === 0) {
+            return;
+        }
+        this.displayImages = this.performance.images.data ?? [];
+        this.form.performance_id = this.performance.id
        
     },
-    methods: {       
-        async saveDraft() {
+    methods: {    
+        async handleDeleteImage(image) {
             this.isSubmitting = true;
+            try {
+                const response = await axios.delete(this.route('delete_image', this.performanceId), {
+                    params: {
+                        image_id: image.id
+                    }
+                });
+                this.displayImages = response.data.data;
+                this.isSubmitting = false;
+            } catch (error) {
+                this.isSubmitting = false;
+                console.log('-----------------');
+                console.log(error);
+                console.log('-----------------');
+            }
+        }, 
+        async handleSelectImage(event) {
+            const image = event.target.files[0];
+            const maxSizeInMB = 10;
+            const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
+            if (image.size > maxSizeInBytes) {
+                this.$swal.fire({
+                    icon: "error",
+                    title: "Too large image",
+                    text: "ขนาดไฟล์ใหญ่เกินไป กรุณาเลือก file ที่ขนาดไม่เกิน 10 MB",
+                });
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', image);
+            if (this.performanceId != null) {
+                formData.append('performance_id', this.performanceId);
+            }
+            try {
+                this.isSubmitting = true;
+                const response = await axios.post(this.route('upload_image'), formData, {
+                    headers: {'Content-Type': 'multipart/form-data'}
+                });
+                this.displayImages = response.data.images.data;
+                this.performanceId = response.data.performance_id
+                this.isSubmitting = false;
+            } catch (error) {
+                this.isSubmitting = false;
+                console.error('Error uploading image:', error);
+            }
+        },
+        async saveDraft() {
+            this.isSubmitting = true;            
             const url = this.route('save_draft');
             const res = await axios.post(url, this.form);
             if (res.status === 200) {
                 this.isSubmitting = false;
                 this.dirtyForm = false;
+                this.performanceId = res.data.performance_id;
                 return
             }
         },
@@ -905,7 +1024,7 @@ export default {
     },
     computed: {
         
-          isSaved() {
+        isSaved() {
             if (this.dirtyForm) {
                 return false;
             }
